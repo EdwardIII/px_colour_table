@@ -1,28 +1,47 @@
 require 'rmagick'
 include Magick
 
+require 'pp'
 
 image = ImageList.new("source.png")
 
-colours = []
-image.each_pixel do |pixel, column, row|
-  colours.push({pixel: pixel, column: column, row: row, color: pixel.to_color})
+def colors_to_rgb(magick_pixel)
+  [ 
+    magick_pixel.red,
+    magick_pixel.green,
+    magick_pixel.blue
+  ]
 end
 
-require 'pp'
-pp  colours
 
-# output sample:
-#
-# {:pixel=>#<Magick::Pixel:0x00007fba3ca1d288>,
-#  :column=>398,
-#  :row=>315,
-#  :color=>"#101010102424"},
-# {:pixel=>#<Magick::Pixel:0x00007fba3ca1d260>,
-#  :column=>399,
-#  :row=>315,
-#  :color=>"#101010102424"},
-# {:pixel=>#<Magick::Pixel:0x00007fba3ca1d238>,
-#  :column=>400,
-#  :row=>315,
-#  :color=>"#101010102424"},
+#colors = image.color_histogram.keys.map { |magick_pixel| colors_to_rgb magick_pixel }
+
+px_rows = 8
+boom_map_array = (0..px_rows-1).map do |y|
+  # y = ☝️ 
+  x = 0
+  cols = 8
+  rows = 1
+  image
+    .get_pixels(x, y, cols, rows)
+    .map do |magick_pixel| 
+      [
+        magick_pixel.red,
+        magick_pixel.green,
+        magick_pixel.blue
+      ]
+    end
+end
+
+
+boom_map_ruby = %Q(
+class Map
+  attr_accessor :grid
+
+  def initialize
+    @grid = #{boom_map_array.pretty_inspect}
+  end
+end
+)
+
+puts boom_map_ruby
